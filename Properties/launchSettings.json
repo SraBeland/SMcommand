@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "SystemMatrixAPIDemoConsoleApp": {
+      "commandName": "Project",
+      "commandLineArgs": "-l"
+    }
+  }
+}
