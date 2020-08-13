@@ -13,7 +13,7 @@ namespace SystemMatrixAPIDemoConsoleApp
         static public string theDefaultProfileName = "[DEFAULT]";
 
         [JsonProperty()]
-        public string Username { get; set; } = "Admin";
+        public string Username { get; set; } = "Admin"; 
         public string Password { get; set; } = "Password";
         public string Address { get; set; } = "localhost";
         public int? Port { get; set; } = 82;
