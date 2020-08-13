@@ -24,7 +24,7 @@ namespace SystemMatrixAPIDemoConsoleApp
             [Option('u', "Username", Required = false, HelpText = "System Matrix API username")]
             public string username { get; set; } = null;
 
-            [Option('p', "Password", Required = false, HelpText = "System Matrix API password")]
+            [Option('p', "Password", Required = false, HelpText = "System Matrix API password")] 
             public string password { get; set; } = null;
 
             [Option('s', "SaveSettings", Required = false, HelpText = "Save the settings (username, password etc)")]
