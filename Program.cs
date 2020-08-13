@@ -138,6 +138,7 @@ namespace SystemMatrixAPIDemoConsoleApp
                                Console.WriteLine("Connectrion Failed!");
                                Console.WriteLine("Exception:");
                                Console.WriteLine(e.Message);
+                               Console.WriteLine("Note: --help for how to use this app");
                            }
                        }
 
@@ -152,11 +153,11 @@ namespace SystemMatrixAPIDemoConsoleApp
                                {
                                    if (o.brightnessValue == -1) // Set to default
                                    {
-                                       uRL_SetBrightness = "https://" + theData.Address + ":" + theData.Port + "/api/global/defaultBrightness";
+                                       uRL_SetBrightness = "https://" + theData.Address + ":" + theData.Port + "/api/global/commands/defaultBrightness";
                                    }
                                    else
                                    {
-                                       uRL_SetBrightness = "https://" + theData.Address + ":" + theData.Port + "/api/global/brightness/" + o.brightnessValue;
+                                       uRL_SetBrightness = "https://" + theData.Address + ":" + theData.Port + "/api/global/commands/brightness/" + o.brightnessValue;
                                    }
                                }
                                else // Display ID selected
