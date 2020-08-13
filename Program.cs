@@ -85,7 +85,7 @@ namespace SystemMatrixAPIDemoConsoleApp
                        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", _authorization);
                        client.Timeout = TimeSpan.FromSeconds(15);
 
-                       Console.WriteLine(uRL_Monitoring);
+                       Console.WriteLine("URL:'" + uRL_Monitoring + "'");
                        Console.WriteLine($"{theData.Username}:{theData.Password}");
 
                        bool connectFailed = false;
@@ -157,20 +157,20 @@ namespace SystemMatrixAPIDemoConsoleApp
                                    }
                                    else
                                    {
-                                       uRL_SetBrightness = "https://" + theData.Address + ":" + theData.Port + "/api/global/commands/brightness/" + o.brightnessValue;
+                                       uRL_SetBrightness = "https://" + theData.Address + ":" + theData.Port + "/api/global/commands/brightness/" + o.brightnessValue.ToString();
                                    }
                                }
                                else // Display ID selected
                                {
-                                   uRL_SetBrightness = "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + o.selectedDisplayID + "/commands/brightness/" + o.brightnessValue;
+                                   uRL_SetBrightness = "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + o.selectedDisplayID + "/commands/brightness/" + o.brightnessValue.ToString();
                                }
 
                                Console.WriteLine("Sending brightness command");
-                               Console.WriteLine("URL:" + uRL_SetBrightness);
+                               Console.WriteLine("URL:'" + uRL_SetBrightness + "'");
 
                                try
                                {
-                                   HttpResponseMessage response = client.GetAsync(uRL_Monitoring).Result;
+                                   HttpResponseMessage response = client.GetAsync(uRL_SetBrightness).Result;
                                    Console.WriteLine("Result:" + response.IsSuccessStatusCode + ", Status:" + response.StatusCode);
                                }
                                catch

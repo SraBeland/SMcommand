@@ -2,7 +2,7 @@
   "profiles": {
     "SystemMatrixAPIDemoConsoleApp": {
       "commandName": "Project",
-      "commandLineArgs": "-l"
+      "commandLineArgs": "-b 15"
     }
   }
 }
