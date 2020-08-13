@@ -19,7 +19,7 @@ namespace SystemMatrixAPIDemoConsoleApp
         public int? Port { get; set; } = 82;
 
 
-        static public ClassSavedCredentials Load(bool doNotLoad = false)
+        static public ClassSavedCredentials Load(bool doNotLoad = false) 
         {
             ClassSavedCredentials theData;
 
