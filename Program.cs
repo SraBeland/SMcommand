@@ -159,14 +159,19 @@ namespace SystemMatrixAPIDemoConsoleApp
                                }
                                else // Display ID selected
                                {
-                                   uRL_SetBrightness = "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + o.selectedDisplayID + "/commands/brightness/" + o.brightnessValue.ToString();
+                                   if (o.brightnessValue == -1) // Set to default
+                                   {
+                                       uRL_SetBrightness = "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + o.selectedDisplayID + "/commands/defaultBrightness";
+                                   }
+                                   else
+                                   {
+                                       uRL_SetBrightness = "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + o.selectedDisplayID + "/commands/brightness/" + o.brightnessValue.ToString();
+                                   }
+                                   //MatrixURL = "https://" + Thread_thePCProfile.IP_Address_InUse + ":" + Thread_thePCProfile.Port + "/api/displays/" + c.DisplayId.ToString() + "/commands/outputlevels";
                                }
 
                                Console.WriteLine("Sending brightness command");
-
-                               //uRL_SetBrightness = "https://127.0.0.1:82/api/global/commands/brightness/45";
                                Console.WriteLine("URL:'" + uRL_SetBrightness + "'");
-
                                try
                                {
                                    HttpResponseMessage response = client.PostAsync(uRL_SetBrightness, null).Result;
