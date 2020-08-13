@@ -90,7 +90,7 @@ namespace SystemMatrixAPIDemoConsoleApp
                            string uRL_Monitoring = "https://" + theData.Address + ":" + theData.Port + "/api/monitoring";
                            Console.WriteLine("URL:'" + uRL_Monitoring + "'");
                            try
-                           {
+                           { 
                                Console.WriteLine("Retrieving Monitoring information...");
                                HttpResponseMessage response = client.GetAsync(uRL_Monitoring).Result;
 
@@ -163,11 +163,13 @@ namespace SystemMatrixAPIDemoConsoleApp
                                }
 
                                Console.WriteLine("Sending brightness command");
+
+                               //uRL_SetBrightness = "https://127.0.0.1:82/api/global/commands/brightness/45";
                                Console.WriteLine("URL:'" + uRL_SetBrightness + "'");
 
                                try
                                {
-                                   HttpResponseMessage response = client.GetAsync(uRL_SetBrightness).Result;
+                                   HttpResponseMessage response = client.PostAsync(uRL_SetBrightness, null).Result;
                                    Console.WriteLine("Result:" + response.IsSuccessStatusCode + ", Status:" + response.StatusCode);
                                }
                                catch
