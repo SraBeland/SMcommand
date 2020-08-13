@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using PV_NuGet_SystemMatrixAPIAccessCore;
 using PV_NuGet_SystemMatrixAPIAccessCore.SM_API;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Text;
@@ -32,6 +33,24 @@ namespace SystemMatrixAPIDemoConsoleApp
 
             [Option('l', "ListDisplaysID", Required = false, HelpText = "Prints all messages to standard output.")]
             public bool listDisplayIds { get; set; } = false;
+
+            [Option("refreshHeader", Required = false, HelpText = "Send a header on all controllers.")]
+            public bool? refreshHeader { get; set; } = null;
+
+            [Option("powerOn", Required = false, HelpText = "Power power supplies On.")]
+            public bool powerOn { get; set; } = false;
+
+            [Option("powerOff", Required = false, HelpText = "Power power supplies Off.")]
+            public bool powerOff { get; set; } = false;
+
+            [Option("powerCycle", Required = false, HelpText = "Cycle Power power supplies.")]
+            public bool powerCycle { get; set; } = false;
+
+            [Option("enableOutput", Required = false, HelpText = "Enables output on all controllers.")]
+            public bool enableOutput { get; set; } = false;
+
+            [Option("disableOutput", Required = false, HelpText = "Disables output on all controllers.")]
+            public bool disableOutput { get; set; } = false;
 
             [Option('j', "SaveJSON", Required = false, HelpText = "Saves the Monitoring data to Monitoring.json")]
             public bool saveJson { get; set; } = false;
@@ -163,7 +182,7 @@ namespace SystemMatrixAPIDemoConsoleApp
                                {
                                    if (o.brightnessValue == -1) // Set to default
                                    {
-                                       uRL_SetBrightness = "https://" + theData.Address + ":" + theData.Port + "/api/global/commands/defaultBrightness";
+                                       uRL_SetBrightness = "https://" + theData.Address + ":" + theData.Port + "/api/global/commands/defaultbrightness";
                                    }
                                    else
                                    {
@@ -172,14 +191,14 @@ namespace SystemMatrixAPIDemoConsoleApp
                                }
                                else // Display ID selected
                                {
-                                   if (o.brightnessValue == -1) // Set to default
-                                   {
-                                       uRL_SetBrightness = "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + o.selectedDisplayID + "/commands/defaultBrightness";
-                                   }
-                                   else
-                                   {
-                                       uRL_SetBrightness = "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + o.selectedDisplayID + "/commands/brightness/" + o.brightnessValue.ToString();
-                                   }
+                                    if (o.brightnessValue == -1) // Set to default
+                                    {
+                                        uRL_SetBrightness = "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + o.selectedDisplayID + "/commands/defaultbrightness";
+                                    }
+                                    else
+                                    {
+                                        uRL_SetBrightness = "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + o.selectedDisplayID + "/commands/brightness/" + o.brightnessValue.ToString();
+                                    }
                                }
 
                                Console.WriteLine("Sending brightness command");
@@ -192,6 +211,133 @@ namespace SystemMatrixAPIDemoConsoleApp
                                catch
                                {
                                    Console.WriteLine("Brightness command failed!");
+                               }
+                           }
+
+
+                           if (o.powerOff == true)
+                           {
+                               string uRL_post = null;
+
+                               if (o.selectedDisplayID == null) // Global
+                                   uRL_post = "https://" + theData.Address + ":" + theData.Port + "/api/global/commands/powerOff";
+                               else // Display ID selected
+                                   uRL_post = "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + o.selectedDisplayID + "/commands/powerOff";
+
+                               Console.WriteLine("URL:'" + uRL_post + "'");
+                               try
+                               {
+                                   HttpResponseMessage response = client.PostAsync(uRL_post, null).Result;
+                                   Console.WriteLine("Result:" + response.IsSuccessStatusCode + ", Status:" + response.StatusCode);
+                               }
+                               catch
+                               {
+                                   Console.WriteLine("Command failed!");
+                               }
+                           }
+
+                           if (o.powerOn == true)
+                           {
+                               string uRL_post = null;
+
+                               if (o.selectedDisplayID == null) // Global
+                                   uRL_post = "https://" + theData.Address + ":" + theData.Port + "/api/global/commands/powerOn";
+                               else // Display ID selected
+                                   uRL_post = "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + o.selectedDisplayID + "/commands/powerOn";
+
+                               Console.WriteLine("URL:'" + uRL_post + "'");
+                               try
+                               {
+                                   HttpResponseMessage response = client.PostAsync(uRL_post, null).Result;
+                                   Console.WriteLine("Result:" + response.IsSuccessStatusCode + ", Status:" + response.StatusCode);
+                               }
+                               catch
+                               {
+                                   Console.WriteLine("Command failed!");
+                               }
+                           }
+
+                           if (o.powerCycle == true)
+                           {
+                               string uRL_post = null;
+
+                               if (o.selectedDisplayID == null) // Global
+                                   uRL_post = "https://" + theData.Address + ":" + theData.Port + "/api/global/commands/powerCycle";
+                               else // Display ID selected
+                                   uRL_post = "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + o.selectedDisplayID + "/commands/powerCycle";
+
+                               Console.WriteLine("URL:'" + uRL_post + "'");
+                               try
+                               {
+                                   HttpResponseMessage response = client.PostAsync(uRL_post, null).Result;
+                                   Console.WriteLine("Result:" + response.IsSuccessStatusCode + ", Status:" + response.StatusCode);
+                               }
+                               catch
+                               {
+                                   Console.WriteLine("Command failed!");
+                               }
+                           }
+
+                           if (o.enableOutput == true)
+                           {
+                               string uRL_post = null;
+
+                               if (o.selectedDisplayID == null) // Global
+                                   uRL_post = "https://" + theData.Address + ":" + theData.Port + "/api/global/commands/enableOutput";
+                               else // Display ID selected
+                                   uRL_post = "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + o.selectedDisplayID + "/commands/enableOutput";
+
+                               Console.WriteLine("URL:'" + uRL_post + "'");
+                               try
+                               {
+                                   HttpResponseMessage response = client.PostAsync(uRL_post, null).Result;
+                                   Console.WriteLine("Result:" + response.IsSuccessStatusCode + ", Status:" + response.StatusCode);
+                               }
+                               catch
+                               {
+                                   Console.WriteLine("Command failed!");
+                               }
+                           }
+
+                           if (o.disableOutput == true)
+                           {
+                               string uRL_post = null;
+
+                               if (o.selectedDisplayID == null) // Global
+                                   uRL_post = "https://" + theData.Address + ":" + theData.Port + "/api/global/commands/disableOutput";
+                               else // Display ID selected
+                                   uRL_post = "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + o.selectedDisplayID + "/commands/disableOutput";
+
+                               Console.WriteLine("URL:'" + uRL_post + "'");
+                               try
+                               {
+                                   HttpResponseMessage response = client.PostAsync(uRL_post, null).Result;
+                                   Console.WriteLine("Result:" + response.IsSuccessStatusCode + ", Status:" + response.StatusCode);
+                               }
+                               catch
+                               {
+                                   Console.WriteLine("Command failed!");
+                               }
+                           }
+
+                           if (o.refreshHeader == true)
+                           {
+                               string uRL_post = null;
+
+                               if (o.selectedDisplayID == null) // Global
+                                   uRL_post = "https://" + theData.Address + ":" + theData.Port + "/api/global/commands/refreshHeader";
+                               else // Display ID selected
+                                   uRL_post = "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + o.selectedDisplayID + "/commands/sendHeader";
+
+                               Console.WriteLine("URL:'" + uRL_post + "'");
+                               try
+                               {
+                                   HttpResponseMessage response = client.PostAsync(uRL_post, null).Result;
+                                   Console.WriteLine("Result:" + response.IsSuccessStatusCode + ", Status:" + response.StatusCode);
+                               }
+                               catch
+                               {
+                                   Console.WriteLine("Command failed!");
                                }
                            }
                        }
