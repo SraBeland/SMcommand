@@ -74,24 +74,21 @@ namespace SystemMatrixAPIDemoConsoleApp
                        if (o.listDisplayIds == true || o.saveJson == true)
                            o.SuppressMonitoringDataFetch = false;
 
-                       Console.WriteLine("Address: " + theData.Address);
-                       string uRL_Monitoring = "https://" + theData.Address + ":" + theData.Port + "/api/monitoring";
-
                        var jsonRawDataAsString = "";
-
                        var byteData = Encoding.UTF8.GetBytes($"{theData.Username}:{theData.Password}");
                        string _authorization = Convert.ToBase64String(byteData);
 
                        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", _authorization);
                        client.Timeout = TimeSpan.FromSeconds(15);
 
-                       Console.WriteLine("URL:'" + uRL_Monitoring + "'");
                        Console.WriteLine($"{theData.Username}:{theData.Password}");
 
                        bool connectFailed = false;
 
                        if (o.SuppressMonitoringDataFetch == false)
                        {
+                           string uRL_Monitoring = "https://" + theData.Address + ":" + theData.Port + "/api/monitoring";
+                           Console.WriteLine("URL:'" + uRL_Monitoring + "'");
                            try
                            {
                                Console.WriteLine("Retrieving Monitoring information...");
