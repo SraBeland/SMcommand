@@ -68,7 +68,7 @@ namespace SystemMatrixAPIDemoConsoleApp
                        if (o.username != null)
                             theData.Username = o.username;
 
-                       if (theData.Password != null)
+                       if (o.password != null)
                            theData.Password = o.password;
 
                        if (o.saveCredentials)
