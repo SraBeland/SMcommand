@@ -59,10 +59,17 @@ namespace SystemMatrixAPIDemoConsoleApp
             Parser.Default.ParseArguments<Options>(args)
                    .WithParsed<Options>(o =>
                    {
-                       theData.Address ??= o.address;
-                       theData.Port ??= o.port;
-                       theData.Username ??= o.username;
-                       theData.Password ??= o.password;
+                       if (o.address != null)
+                            theData.Address = o.address;
+
+                       if (o.port != null)
+                            theData.Port = o.port;
+
+                       if (o.username != null)
+                            theData.Username = o.username;
+
+                       if (theData.Password != null)
+                           theData.Password = o.password;
 
                        if (o.saveCredentials)
                        {
@@ -146,6 +153,12 @@ namespace SystemMatrixAPIDemoConsoleApp
                            {
                                string uRL_SetBrightness = null;
 
+                               ClassSystemMatrixPayloadOutputLevels payload = new ClassSystemMatrixPayloadOutputLevels();
+
+                               //payload.brightness = (int) o.brightnessValue;
+                               //string json_payload = payload.Json();
+                               //var postPayload = new StringContent(json_payload, Encoding.UTF8, "application/json");
+
                                if (o.selectedDisplayID == null) // Global
                                {
                                    if (o.brightnessValue == -1) // Set to default
@@ -167,7 +180,6 @@ namespace SystemMatrixAPIDemoConsoleApp
                                    {
                                        uRL_SetBrightness = "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + o.selectedDisplayID + "/commands/brightness/" + o.brightnessValue.ToString();
                                    }
-                                   //MatrixURL = "https://" + Thread_thePCProfile.IP_Address_InUse + ":" + Thread_thePCProfile.Port + "/api/displays/" + c.DisplayId.ToString() + "/commands/outputlevels";
                                }
 
                                Console.WriteLine("Sending brightness command");
@@ -184,6 +196,41 @@ namespace SystemMatrixAPIDemoConsoleApp
                            }
                        }
                    });
+        }
+
+        public class ClassSystemMatrixPayloadOutputLevels
+        {
+            public double brightness { get; set; }
+            public double gamma { get; set; }
+            public double red { get; set; }
+            public double green { get; set; }
+            public double blue { get; set; }
+
+            public ClassSystemMatrixPayloadOutputLevels()
+            {
+                brightness = 5;
+                gamma = 2.2;
+                red = 80;
+                green = 80;
+                blue = 80;
+            }
+
+
+            public string Json()
+            {
+                string body = "";
+
+                try
+                {
+                    body = JsonConvert.SerializeObject(this);
+                }
+                catch
+                {
+                    body = "";
+                }
+
+                return body;
+            }
         }
     }
 }
