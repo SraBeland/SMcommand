@@ -1,2 +1,2 @@
-# SystemMatrixAPIDemoConsoleApp
-# Provides an example on how to call System Matrix
+# SMcommand
+# Command line utility to control System Matrix Prismview displays.
