@@ -9,7 +9,7 @@ using System.IO;
 using System.Net.Http;
 using System.Text;
 
-namespace SystemMatrixAPIDemoConsoleApp
+namespace SMcommand
 {
     // Define a class to receive parsed values
 
@@ -83,7 +83,7 @@ namespace SystemMatrixAPIDemoConsoleApp
             int brightnessValueForTestPattern = 10;
 
 
-            ClassSavedCredentials theData = ClassSavedCredentials.Load();
+            ClassSavedSettings theData = ClassSavedSettings.Load();
 
             // Pass the handler to httpclient(from you are calling api)
             HttpClient client = new HttpClient(clientHandler);
@@ -113,7 +113,7 @@ namespace SystemMatrixAPIDemoConsoleApp
                        if (o.saveCredentials)
                        {
                            Console.WriteLine("Saving settings");
-                           ClassSavedCredentials.Save(theData);
+                           ClassSavedSettings.Save(theData);
                        }
 
                        theMonitoringData = new SM_Monitoring(o.address);

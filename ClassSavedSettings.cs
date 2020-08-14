@@ -5,11 +5,11 @@ using Newtonsoft.Json;
 using System.IO;
 using System.Security.Cryptography;
 
-namespace SystemMatrixAPIDemoConsoleApp
+namespace SMcommand
 {
-    class ClassSavedCredentials
+    class ClassSavedSettings
     {
-        static private string theFilename = "SystemMatrixAPIDemoConsoleAppSettings.json";
+        static private string theFilename = "SMcommandSettings.json";
         static public string theDefaultProfileName = "[DEFAULT]";
 
         [JsonProperty()]
@@ -19,9 +19,9 @@ namespace SystemMatrixAPIDemoConsoleApp
         public int? Port { get; set; } = 82;
 
 
-        static public ClassSavedCredentials Load(bool doNotLoad = false) 
+        static public ClassSavedSettings Load(bool doNotLoad = false) 
         {
-            ClassSavedCredentials theData;
+            ClassSavedSettings theData;
 
             // Load the Profiles for diagnostics
             if (File.Exists(theFilename)
@@ -32,26 +32,26 @@ namespace SystemMatrixAPIDemoConsoleApp
                     using (StreamReader file = File.OpenText(theFilename))
                     {
                         JsonSerializer serializer = new JsonSerializer();
-                        theData = (ClassSavedCredentials)serializer.Deserialize(file, typeof(ClassSavedCredentials));
+                        theData = (ClassSavedSettings)serializer.Deserialize(file, typeof(ClassSavedSettings));
                     }
                 }
                 catch
                 {
-                    theData = new ClassSavedCredentials();
+                    theData = new ClassSavedSettings();
                 }
             }
             else
             {
-                theData = new ClassSavedCredentials();
+                theData = new ClassSavedSettings();
             }
 
             if (theData == null)
-                theData = new ClassSavedCredentials();
+                theData = new ClassSavedSettings();
 
             return theData;
         }
 
-        static public void Save(ClassSavedCredentials theData)
+        static public void Save(ClassSavedSettings theData)
         {
             using (StreamWriter file = File.CreateText(theFilename))
             {
