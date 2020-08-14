@@ -1,5 +1,6 @@
 ﻿using CommandLine;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using PV_NuGet_SystemMatrixAPIAccessCore;
 using PV_NuGet_SystemMatrixAPIAccessCore.SM_API;
 using System;
@@ -16,64 +17,77 @@ namespace SystemMatrixAPIDemoConsoleApp
     {
         private class Options
         {
-            [Option('a', "Address", Required = false, HelpText = "System Matrix IP address [example: localhost, 192.168.1.1]")] 
+            [Option('a', "address", Required = false, HelpText = "System Matrix IP address [example: localhost, 192.168.1.1]")] 
             public string address { get; set; } = null;
 
-            [Option('t', "Port", Required = false, HelpText = "The port System Matrix is running on [int] default is 82")]
+            [Option("port", Required = false, HelpText = "The port System Matrix is running on [int] default is 82")]
             public int? port { get; set; } = null;
 
-            [Option('u', "Username", Required = false, HelpText = "System Matrix API username")]
+            [Option("starttestpattern", Required = false, HelpText = "Starts a test pattern [SolidRed, SolidGreen, SolidBlue, SolidWhite, CycleColors, LinesVertical, LinesDiagonal, GridColors, GridNumbered]")]
+            public string testPattern { get; set; } = null;
+
+            [Option("stoptestpattern", Required = false, HelpText = "Stop test pattern")]
+            public bool testPatternStop { get; set; } = false;
+
+            [Option('u', "username", Required = false, HelpText = "System Matrix API username")]
             public string username { get; set; } = null;
 
-            [Option('p', "Password", Required = false, HelpText = "System Matrix API password")] 
+            [Option('p', "password", Required = false, HelpText = "System Matrix API password")] 
             public string password { get; set; } = null;
 
-            [Option('s', "SaveSettings", Required = false, HelpText = "Save the settings (username, password etc)")]
+            [Option('s', "save", Required = false, HelpText = "Save the settings (username, password etc)")]
             public bool saveCredentials { get; set; } = false;
 
-            [Option('l', "ListDisplaysID", Required = false, HelpText = "Prints all messages to standard output.")]
+            [Option('l', "listdisplays", Required = false, HelpText = "Prints all messages to standard output.")]
             public bool listDisplayIds { get; set; } = false;
 
-            [Option("refreshHeader", Required = false, HelpText = "Send a header on all controllers.")]
+            [Option("refreshheader", Required = false, HelpText = "Send a header on all controllers.")]
             public bool? refreshHeader { get; set; } = null;
 
-            [Option("powerOn", Required = false, HelpText = "Power power supplies On.")]
+            [Option("poweron", Required = false, HelpText = "Power power supplies On.")]
             public bool powerOn { get; set; } = false;
 
-            [Option("powerOff", Required = false, HelpText = "Power power supplies Off.")]
+            [Option("poweroff", Required = false, HelpText = "Power power supplies Off.")]
             public bool powerOff { get; set; } = false;
 
-            [Option("powerCycle", Required = false, HelpText = "Cycle Power power supplies.")]
+            [Option("powercycle", Required = false, HelpText = "Cycle Power power supplies.")]
             public bool powerCycle { get; set; } = false;
 
-            [Option("enableOutput", Required = false, HelpText = "Enables output on all controllers.")]
+            [Option("enableoutput", Required = false, HelpText = "Enables output on all controllers.")]
             public bool enableOutput { get; set; } = false;
 
-            [Option("disableOutput", Required = false, HelpText = "Disables output on all controllers.")]
+            [Option("disableoutput", Required = false, HelpText = "Disables output on all controllers.")]
             public bool disableOutput { get; set; } = false;
 
-            [Option('j', "SaveJSON", Required = false, HelpText = "Saves the Monitoring data to Monitoring.json")]
+            [Option('j', "savejson", Required = false, HelpText = "Saves the Monitoring data to Monitoring.json")]
             public bool saveJson { get; set; } = false;
 
-            [Option('b', "BrightnessValue", Required = false, HelpText = "Sets all displays to a brightness [int] (-1 to revert to default value)")]
+            [Option('b', "brightness", Required = false, HelpText = "Sets all displays to a brightness [int] (-1 to revert to default value)")]
             public int? brightnessValue { get; set; } = null;
 
-            [Option("NoDataFetch", Required = false, HelpText = "Prevents the Monitoring data from being retrieved - if other commands require the data it will still be retrieved.")]
+            [Option('z', "nofetch", Required = false, HelpText = "Prevents the Monitoring data from being retrieved - if other commands require the data it will still be retrieved.")]
             public bool SuppressMonitoringDataFetch { get; set; } = false;
 
-            [Option('i', "SelectDisplay", Required = false, HelpText = "Display ID to control (do not include to send to all display)")]
-            public string selectedDisplayID { get; set; } = null;
+            [Option('d', "displays", Required = false, HelpText = "Display ID (GUID or Name) to control (do not include to send to all display)")]
+            public IEnumerable<string> InputFiles { get; set; } = null;
+//            public string selectedDisplayID { get; set; } = null;
+
+            //[Option('r', "read", Required = true, HelpText = "Input files to be processed.")]
+            //public IEnumerable<string> InputFiles { get; set; }
         }
 
         private static void Main(string[] args)
         {
             HttpClientHandler clientHandler = new HttpClientHandler();
             clientHandler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; };
+            int brightnessValueForTestPattern = 10;
+
 
             ClassSavedCredentials theData = ClassSavedCredentials.Load();
 
             // Pass the handler to httpclient(from you are calling api)
             HttpClient client = new HttpClient(clientHandler);
+            SM_Monitoring theMonitoringData;
 
             Parser.Default.ParseArguments<Options>(args)
                    .WithParsed<Options>(o =>
@@ -90,14 +104,22 @@ namespace SystemMatrixAPIDemoConsoleApp
                        if (o.password != null)
                            theData.Password = o.password;
 
+                       if (o.brightnessValue != null)
+                           brightnessValueForTestPattern = (int) o.brightnessValue;
+
+                       if (brightnessValueForTestPattern == -1)
+                           brightnessValueForTestPattern = 10;
+
                        if (o.saveCredentials)
                        {
                            Console.WriteLine("Saving settings");
                            ClassSavedCredentials.Save(theData);
                        }
 
+                       theMonitoringData = new SM_Monitoring(o.address);
+
                        // I some commands require the monitoring data override it.
-                       if (o.listDisplayIds == true || o.saveJson == true)
+                       if (o.listDisplayIds == true || o.saveJson == true || o.InputFiles != null)
                            o.SuppressMonitoringDataFetch = false;
 
                        var jsonRawDataAsString = "";
@@ -135,7 +157,6 @@ namespace SystemMatrixAPIDemoConsoleApp
                                    }
                                }
 
-                               SM_Monitoring theMonitoringData = new SM_Monitoring(o.address);
 
                                SM_API_Call theSM_API = new SM_API_Call();
                                theMonitoringData.JsonPayload.httpCallResultDetail = "OK";
@@ -147,10 +168,10 @@ namespace SystemMatrixAPIDemoConsoleApp
 
                                if (o.listDisplayIds)
                                {
-                                   Console.WriteLine("List Displays IDs");
+                                   Console.WriteLine("Displays");
                                    foreach (var i in theMonitoringData.theData.Displays)
                                    {
-                                       Console.WriteLine("Display : " + i.Name + " is GUID: " + i.Id);
+                                       Console.WriteLine("Display: '" + i.Name + "' GUID: " + i.Id);
                                    }
                                }
                            }
@@ -165,6 +186,48 @@ namespace SystemMatrixAPIDemoConsoleApp
                            }
                        }
 
+
+                       List<displayToSendTo> theDisplayToSendTo = new List<displayToSendTo>();
+
+                       foreach (string d in o.InputFiles)
+                       {
+                            bool isGuid = false;
+                            Guid passedInGuid = Guid.Empty;
+
+                            if (Guid.TryParse(d, out passedInGuid))
+                            {
+                                isGuid = true;
+                            }
+
+                           bool foundIt = false;
+                            foreach (var i in theMonitoringData.theData.Displays)
+                            {
+                                if (isGuid)
+                                {
+                                   if (i.Id == passedInGuid)
+                                   {
+                                       theDisplayToSendTo.Add(new displayToSendTo (i.Id, i.Name));
+                                       foundIt = true;
+                                   }
+                                }
+                                else
+                                {
+                                   if (d == i.Name)
+                                   {
+                                       theDisplayToSendTo.Add(new displayToSendTo(i.Id, i.Name));
+                                       foundIt = true;
+                                   }
+                               }
+                           }
+
+                            if (foundIt == false)
+                            {
+                                Console.WriteLine("Error: The selected display [" + d + "] ID is not found.");
+                                return;
+                            }
+                       }
+
+
                        // If a monitoring get faile don't bother to do anything else.
                        if (connectFailed == false)
                        {
@@ -173,176 +236,172 @@ namespace SystemMatrixAPIDemoConsoleApp
                                string uRL_SetBrightness = null;
 
                                ClassSystemMatrixPayloadOutputLevels payload = new ClassSystemMatrixPayloadOutputLevels();
-
-                               //payload.brightness = (int) o.brightnessValue;
-                               //string json_payload = payload.Json();
-                               //var postPayload = new StringContent(json_payload, Encoding.UTF8, "application/json");
-
-                               if (o.selectedDisplayID == null) // Global
+                               if (theDisplayToSendTo.Count == 0) // Global
                                {
                                    if (o.brightnessValue == -1) // Set to default
-                                   {
-                                       uRL_SetBrightness = "https://" + theData.Address + ":" + theData.Port + "/api/global/commands/defaultbrightness";
-                                   }
+                                       PostIt("[ALL]", client, "https://" + theData.Address + ":" + theData.Port + "/api/global/commands/defaultbrightness");
                                    else
-                                   {
-                                       uRL_SetBrightness = "https://" + theData.Address + ":" + theData.Port + "/api/global/commands/brightness/" + o.brightnessValue.ToString();
-                                   }
+                                       PostIt("[ALL]", client, "https://" + theData.Address + ":" + theData.Port + "/api/global/commands/brightness/" + o.brightnessValue.ToString());
                                }
                                else // Display ID selected
                                {
-                                    if (o.brightnessValue == -1) // Set to default
-                                    {
-                                        uRL_SetBrightness = "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + o.selectedDisplayID + "/commands/defaultbrightness";
-                                    }
-                                    else
-                                    {
-                                        uRL_SetBrightness = "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + o.selectedDisplayID + "/commands/brightness/" + o.brightnessValue.ToString();
-                                    }
-                               }
-
-                               Console.WriteLine("Sending brightness command");
-                               Console.WriteLine("URL:'" + uRL_SetBrightness + "'");
-                               try
-                               {
-                                   HttpResponseMessage response = client.PostAsync(uRL_SetBrightness, null).Result;
-                                   Console.WriteLine("Result:" + response.IsSuccessStatusCode + ", Status:" + response.StatusCode);
-                               }
-                               catch
-                               {
-                                   Console.WriteLine("Brightness command failed!");
+                                   foreach (displayToSendTo g in theDisplayToSendTo)
+                                   {
+                                       if (o.brightnessValue == -1) // Set to default
+                                           PostIt(g.displayName, client, uRL_SetBrightness = "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + g.displayGuid + "/commands/defaultbrightness");
+                                       else
+                                           PostIt(g.displayName, client, uRL_SetBrightness = "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + g.displayGuid + "/commands/brightness/" + o.brightnessValue.ToString());
+                                   }
                                }
                            }
 
 
                            if (o.powerOff == true)
                            {
-                               string uRL_post = null;
-
-                               if (o.selectedDisplayID == null) // Global
-                                   uRL_post = "https://" + theData.Address + ":" + theData.Port + "/api/global/commands/powerOff";
-                               else // Display ID selected
-                                   uRL_post = "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + o.selectedDisplayID + "/commands/powerOff";
-
-                               Console.WriteLine("URL:'" + uRL_post + "'");
-                               try
+                               if (theDisplayToSendTo.Count == 0) // Global
+                                   PostIt("[ALL]", client, "https://" + theData.Address + ":" + theData.Port + "/api/global/commands/powerOff");
+                               else
                                {
-                                   HttpResponseMessage response = client.PostAsync(uRL_post, null).Result;
-                                   Console.WriteLine("Result:" + response.IsSuccessStatusCode + ", Status:" + response.StatusCode);
-                               }
-                               catch
-                               {
-                                   Console.WriteLine("Command failed!");
+                                   foreach (displayToSendTo g in theDisplayToSendTo)
+                                       PostIt(g.displayName, client, "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + g.displayGuid + "/commands/powerOff");
                                }
                            }
 
                            if (o.powerOn == true)
                            {
-                               string uRL_post = null;
-
-                               if (o.selectedDisplayID == null) // Global
-                                   uRL_post = "https://" + theData.Address + ":" + theData.Port + "/api/global/commands/powerOn";
-                               else // Display ID selected
-                                   uRL_post = "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + o.selectedDisplayID + "/commands/powerOn";
-
-                               Console.WriteLine("URL:'" + uRL_post + "'");
-                               try
+                               if (theDisplayToSendTo.Count == 0) // Global
+                                   PostIt("[ALL]", client, "https://" + theData.Address + ":" + theData.Port + "/api/global/commands/powerOn");
+                               else
                                {
-                                   HttpResponseMessage response = client.PostAsync(uRL_post, null).Result;
-                                   Console.WriteLine("Result:" + response.IsSuccessStatusCode + ", Status:" + response.StatusCode);
-                               }
-                               catch
-                               {
-                                   Console.WriteLine("Command failed!");
+                                   foreach (displayToSendTo g in theDisplayToSendTo)
+                                       PostIt(g.displayName, client, "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + g.displayGuid + "/commands/powerOn");
                                }
                            }
 
                            if (o.powerCycle == true)
                            {
-                               string uRL_post = null;
-
-                               if (o.selectedDisplayID == null) // Global
-                                   uRL_post = "https://" + theData.Address + ":" + theData.Port + "/api/global/commands/powerCycle";
-                               else // Display ID selected
-                                   uRL_post = "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + o.selectedDisplayID + "/commands/powerCycle";
-
-                               Console.WriteLine("URL:'" + uRL_post + "'");
-                               try
+                               if (theDisplayToSendTo.Count == 0) // Global
+                                   PostIt("[ALL]", client, "https://" + theData.Address + ":" + theData.Port + "/api/global/commands/powerCycle");
+                               else
                                {
-                                   HttpResponseMessage response = client.PostAsync(uRL_post, null).Result;
-                                   Console.WriteLine("Result:" + response.IsSuccessStatusCode + ", Status:" + response.StatusCode);
-                               }
-                               catch
-                               {
-                                   Console.WriteLine("Command failed!");
+                                   foreach (displayToSendTo g in theDisplayToSendTo)
+                                       PostIt(g.displayName, client, "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + g.displayGuid + "/commands/powerCycle");
                                }
                            }
 
                            if (o.enableOutput == true)
                            {
-                               string uRL_post = null;
-
-                               if (o.selectedDisplayID == null) // Global
-                                   uRL_post = "https://" + theData.Address + ":" + theData.Port + "/api/global/commands/enableOutput";
-                               else // Display ID selected
-                                   uRL_post = "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + o.selectedDisplayID + "/commands/enableOutput";
-
-                               Console.WriteLine("URL:'" + uRL_post + "'");
-                               try
+                               if (theDisplayToSendTo.Count == 0) // Global
+                                   PostIt("[ALL]", client, "https://" + theData.Address + ":" + theData.Port + "/api/global/commands/enableOutput");
+                               else
                                {
-                                   HttpResponseMessage response = client.PostAsync(uRL_post, null).Result;
-                                   Console.WriteLine("Result:" + response.IsSuccessStatusCode + ", Status:" + response.StatusCode);
-                               }
-                               catch
-                               {
-                                   Console.WriteLine("Command failed!");
+                                   foreach (displayToSendTo g in theDisplayToSendTo)
+                                       PostIt(g.displayName, client, "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + g.displayGuid + "/commands/enableOutput");
                                }
                            }
 
                            if (o.disableOutput == true)
                            {
-                               string uRL_post = null;
-
-                               if (o.selectedDisplayID == null) // Global
-                                   uRL_post = "https://" + theData.Address + ":" + theData.Port + "/api/global/commands/disableOutput";
-                               else // Display ID selected
-                                   uRL_post = "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + o.selectedDisplayID + "/commands/disableOutput";
-
-                               Console.WriteLine("URL:'" + uRL_post + "'");
-                               try
+                               if (theDisplayToSendTo.Count == 0) // Global
+                                   PostIt("[ALL]", client, "https://" + theData.Address + ":" + theData.Port + "/api/global/commands/disableOutput");
+                               else
                                {
-                                   HttpResponseMessage response = client.PostAsync(uRL_post, null).Result;
-                                   Console.WriteLine("Result:" + response.IsSuccessStatusCode + ", Status:" + response.StatusCode);
-                               }
-                               catch
-                               {
-                                   Console.WriteLine("Command failed!");
+                                   foreach (displayToSendTo g in theDisplayToSendTo)
+                                       PostIt(g.displayName, client, "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + g.displayGuid + "/commands/disableOutput");
                                }
                            }
 
                            if (o.refreshHeader == true)
                            {
-                               string uRL_post = null;
-
-                               if (o.selectedDisplayID == null) // Global
-                                   uRL_post = "https://" + theData.Address + ":" + theData.Port + "/api/global/commands/refreshHeader";
-                               else // Display ID selected
-                                   uRL_post = "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + o.selectedDisplayID + "/commands/sendHeader";
-
-                               Console.WriteLine("URL:'" + uRL_post + "'");
-                               try
+                               if (theDisplayToSendTo.Count == 0) // Global
+                                   PostIt("[ALL]", client, "https://" + theData.Address + ":" + theData.Port + "/api/global/commands/refreshHeader");
+                               else
                                {
-                                   HttpResponseMessage response = client.PostAsync(uRL_post, null).Result;
-                                   Console.WriteLine("Result:" + response.IsSuccessStatusCode + ", Status:" + response.StatusCode);
+                                   foreach (displayToSendTo g in theDisplayToSendTo)
+                                       PostIt(g.displayName, client, "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + g.displayGuid + "/commands/sendHeader");
                                }
-                               catch
+                           }
+
+                           if (o.testPattern != null)
+                           {
+                               ClassSystemMatrixPayloadTestPattern thePatternPayload = new ClassSystemMatrixPayloadTestPattern();
+                               thePatternPayload.Action = SystemMatrixCommandPayload_Action.Start;
+                               thePatternPayload.Brightness = brightnessValueForTestPattern;
+                               bool validTestPattern = true;
+
+                               switch (o.testPattern.ToLower ())
                                {
-                                   Console.WriteLine("Command failed!");
+                                   case "solidred": thePatternPayload.TestPattern = SystemMatrixCommandPayload_TestPattern.SolidRed; break;
+                                   case "solidgreen": thePatternPayload.TestPattern = SystemMatrixCommandPayload_TestPattern.SolidGreen; break;
+                                   case "solidblue": thePatternPayload.TestPattern = SystemMatrixCommandPayload_TestPattern.SolidBlue; break;
+                                   case "solidwhite": thePatternPayload.TestPattern = SystemMatrixCommandPayload_TestPattern.SolidWhite; break;
+                                   case "cyclecolors": thePatternPayload.TestPattern = SystemMatrixCommandPayload_TestPattern.CycleColors; break;
+                                   case "linesvertical": thePatternPayload.TestPattern = SystemMatrixCommandPayload_TestPattern.LinesVertical; break;
+                                   case "linesdiagonal": thePatternPayload.TestPattern = SystemMatrixCommandPayload_TestPattern.LinesDiagonal; break;
+                                   case "gridcolors": thePatternPayload.TestPattern = SystemMatrixCommandPayload_TestPattern.GridColors; break;
+                                   case "gridnumbered": thePatternPayload.TestPattern = SystemMatrixCommandPayload_TestPattern.GridNumbered; break;
+
+                                   default:
+                                       {
+                                           validTestPattern = false;
+                                           Console.WriteLine("Error: Test pattern not valid: '" + o.testPattern + "'");
+                                       }; break;
+                               }
+
+                               if (validTestPattern == true)
+                               {
+                                   var postPayload = new StringContent(thePatternPayload.Json(), Encoding.UTF8, "application/json");
+
+                                   if (theDisplayToSendTo.Count == 0) // Global
+                                   {
+                                       foreach (var i in theMonitoringData.theData.Displays)
+                                           PostIt(i.Name, client, "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + i.Id + "/commands/testpatterns", postPayload);
+                                   }
+                                   else
+                                   {
+                                       foreach (displayToSendTo g in theDisplayToSendTo)
+                                           PostIt(g.displayName, client, "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + g.displayGuid + "/commands/testpatterns", postPayload);
+                                   }
                                }
                            }
                        }
                    });
         }
+
+        class displayToSendTo
+        {
+            public string displayName;
+            public Guid displayGuid;
+
+            public displayToSendTo (Guid g, string n)
+            {
+                displayName = n;
+                displayGuid = g;
+            }
+        }
+
+
+        static bool PostIt(string displayName, HttpClient client, string url, StringContent postPayload = null)
+        {
+            Console.WriteLine("Send to display:" + displayName + "   URL:'" + url + "'");
+            if (postPayload != null)
+                Console.WriteLine("Payload:'" + postPayload.ReadAsStringAsync().Result + "'");
+
+            try
+            {
+                HttpResponseMessage response = client.PostAsync(url, postPayload).Result;
+                Console.WriteLine("Result:" + response.IsSuccessStatusCode + ", Status:" + response.StatusCode);
+                return false;
+            }
+            catch
+            {
+                Console.WriteLine("Command failed!");
+                return false;
+            }
+        }
+
+
+
 
         public class ClassSystemMatrixPayloadOutputLevels
         {
@@ -378,5 +437,51 @@ namespace SystemMatrixAPIDemoConsoleApp
                 return body;
             }
         }
+
+        public enum SystemMatrixCommandPayload_Action { Start, Stop };
+        public enum SystemMatrixCommandPayload_TestPattern { SolidRed, SolidGreen, SolidBlue, SolidWhite, CycleColors, LinesVertical, LinesDiagonal, GridColors, GridNumbered };
+
+        public class ClassSystemMatrixPayloadTestPattern
+        {
+            [JsonConverter(typeof(StringEnumConverter))]
+            public SystemMatrixCommandPayload_Action Action { get; set; }
+            public double Brightness { get; set; }
+            [JsonConverter(typeof(StringEnumConverter))]
+            public SystemMatrixCommandPayload_TestPattern TestPattern { get; set; }
+
+            public ClassSystemMatrixPayloadTestPattern()
+            {
+                Action = SystemMatrixCommandPayload_Action.Start;
+                Brightness = 50;
+                TestPattern = SystemMatrixCommandPayload_TestPattern.CycleColors;
+            }
+
+            public ClassSystemMatrixPayloadTestPattern(SystemMatrixCommandPayload_Action InAction, SystemMatrixCommandPayload_TestPattern InTestPattern, double InBrightness)
+            {
+                Action = InAction;
+                Brightness = InBrightness;
+                TestPattern = InTestPattern;
+            }
+
+
+            public string Json()
+            {
+                string body = "";
+
+                try
+                {
+                    body = JsonConvert.SerializeObject(this);
+                }
+                catch
+                {
+                    body = "";
+                }
+
+                return body;
+            }
+        }
+
+
+
     }
 }

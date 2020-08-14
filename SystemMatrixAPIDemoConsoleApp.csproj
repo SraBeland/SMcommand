@@ -4,13 +4,14 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <StartupObject>SystemMatrixAPIDemoConsoleApp.Program</StartupObject>
+    <Version>1.0.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="CommandLineParser" Version="2.8.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-    <PackageReference Include="PV_Nuget_SpectrumEvents" Version="1.0.3" />
-    <PackageReference Include="PV_NuGet_SystemMatrixAPIAccessCore" Version="1.0.3" />
+    <PackageReference Include="PV_Nuget_SpectrumEvents" Version="1.0.4" />
+    <PackageReference Include="PV_NuGet_SystemMatrixAPIAccessCore" Version="1.0.4" />
   </ItemGroup>
 
 </Project>
