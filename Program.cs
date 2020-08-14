@@ -20,15 +20,6 @@ namespace SMcommand
             [Option('a', "address", Required = false, HelpText = "System Matrix IP address [example: localhost, 192.168.1.1]")] 
             public string address { get; set; } = null;
 
-            [Option("port", Required = false, HelpText = "The port System Matrix is running on [int] default is 82")]
-            public int? port { get; set; } = null;
-
-            [Option("starttestpattern", Required = false, HelpText = "Starts a test pattern [SolidRed, SolidGreen, SolidBlue, SolidWhite, CycleColors, LinesVertical, LinesDiagonal, GridColors, GridNumbered]")]
-            public string testPattern { get; set; } = null;
-
-            [Option("stoptestpattern", Required = false, HelpText = "Stop test pattern")]
-            public bool testPatternStop { get; set; } = false;
-
             [Option('u', "username", Required = false, HelpText = "System Matrix API username")]
             public string username { get; set; } = null;
 
@@ -40,6 +31,21 @@ namespace SMcommand
 
             [Option('l', "listdisplays", Required = false, HelpText = "Prints all messages to standard output.")]
             public bool listDisplayIds { get; set; } = false;
+
+            [Option('j', "savejson", Required = false, HelpText = "Saves the Monitoring data to Monitoring.json")]
+            public bool saveJson { get; set; } = false;
+
+            [Option('b', "brightness", Required = false, HelpText = "Sets all displays to a brightness [int] (-1 to revert to default value)")]
+            public int? brightnessValue { get; set; } = null;
+
+            [Option('z', "nofetch", Required = false, HelpText = "Prevents the Monitoring data from being retrieved - if other commands require the data it will still be retrieved.")]
+            public bool SuppressMonitoringDataFetch { get; set; } = false;
+
+            [Option('d', "displays", Required = false, HelpText = "Display ID (GUID or Name) to control (do not include to send to all display)")]
+            public IEnumerable<string> InputFiles { get; set; } = null;
+
+            [Option("port", Required = false, HelpText = "The port System Matrix is running on [int] default is 82")]
+            public int? port { get; set; } = null;
 
             [Option("refreshheader", Required = false, HelpText = "Send a header on all controllers.")]
             public bool? refreshHeader { get; set; } = null;
@@ -58,22 +64,12 @@ namespace SMcommand
 
             [Option("disableoutput", Required = false, HelpText = "Disables output on all controllers.")]
             public bool disableOutput { get; set; } = false;
+            [Option("starttestpattern", Required = false, HelpText = "Starts a test pattern [SolidRed, SolidGreen, SolidBlue, SolidWhite, CycleColors, LinesVertical, LinesDiagonal, GridColors, GridNumbered]")]
+            public string testPattern { get; set; } = null;
 
-            [Option('j', "savejson", Required = false, HelpText = "Saves the Monitoring data to Monitoring.json")]
-            public bool saveJson { get; set; } = false;
+            [Option("stoptestpattern", Required = false, HelpText = "Stop test pattern")]
+            public bool testPatternStop { get; set; } = false;
 
-            [Option('b', "brightness", Required = false, HelpText = "Sets all displays to a brightness [int] (-1 to revert to default value)")]
-            public int? brightnessValue { get; set; } = null;
-
-            [Option('z', "nofetch", Required = false, HelpText = "Prevents the Monitoring data from being retrieved - if other commands require the data it will still be retrieved.")]
-            public bool SuppressMonitoringDataFetch { get; set; } = false;
-
-            [Option('d', "displays", Required = false, HelpText = "Display ID (GUID or Name) to control (do not include to send to all display)")]
-            public IEnumerable<string> InputFiles { get; set; } = null;
-//            public string selectedDisplayID { get; set; } = null;
-
-            //[Option('r', "read", Required = true, HelpText = "Input files to be processed.")]
-            //public IEnumerable<string> InputFiles { get; set; }
         }
 
         private static void Main(string[] args)
