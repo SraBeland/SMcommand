@@ -41,8 +41,11 @@ namespace SMcommand
             [Option('z', "nofetch", Required = false, HelpText = "Prevents the Monitoring data from being retrieved - if other commands require the data it will still be retrieved.")]
             public bool SuppressMonitoringDataFetch { get; set; } = false;
 
+            [Option('t', "starttestpattern", Required = false, HelpText = "Starts a test pattern [SolidRed, SolidGreen, SolidBlue, SolidWhite, CycleColors, LinesVertical, LinesDiagonal, GridColors, GridNumbered] [brightness]")]
+            public IEnumerable<string> testPattern { get; set; } = null;
+
             [Option('d', "displays", Required = false, HelpText = "Display ID (GUID or Name) to control (do not include to send to all display)")]
-            public IEnumerable<string> InputFiles { get; set; } = null;
+            public IEnumerable<string> DisplayList { get; set; } = null;
 
             [Option("port", Required = false, HelpText = "The port System Matrix is running on [int] default is 82")]
             public int? port { get; set; } = null;
@@ -64,20 +67,17 @@ namespace SMcommand
 
             [Option("disableoutput", Required = false, HelpText = "Disables output on all controllers.")]
             public bool disableOutput { get; set; } = false;
-            [Option("starttestpattern", Required = false, HelpText = "Starts a test pattern [SolidRed, SolidGreen, SolidBlue, SolidWhite, CycleColors, LinesVertical, LinesDiagonal, GridColors, GridNumbered]")]
-            public string testPattern { get; set; } = null;
 
             [Option("stoptestpattern", Required = false, HelpText = "Stop test pattern")]
             public bool testPatternStop { get; set; } = false;
-
         }
+
 
         private static void Main(string[] args)
         {
             HttpClientHandler clientHandler = new HttpClientHandler();
             clientHandler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; };
             int brightnessValueForTestPattern = 10;
-
 
             ClassSavedSettings theData = ClassSavedSettings.Load();
 
@@ -115,7 +115,7 @@ namespace SMcommand
                        theMonitoringData = new SM_Monitoring(o.address);
 
                        // I some commands require the monitoring data override it.
-                       if (o.listDisplayIds == true || o.saveJson == true || o.InputFiles != null)
+                       if (o.listDisplayIds == true || o.saveJson == true || o.DisplayList != null)
                            o.SuppressMonitoringDataFetch = false;
 
                        var jsonRawDataAsString = "";
@@ -185,7 +185,7 @@ namespace SMcommand
 
                        List<displayToSendTo> theDisplayToSendTo = new List<displayToSendTo>();
 
-                       foreach (string d in o.InputFiles)
+                       foreach (string d in o.DisplayList)
                        {
                             bool isGuid = false;
                             Guid passedInGuid = Guid.Empty;
@@ -230,23 +230,34 @@ namespace SMcommand
                            if (o.brightnessValue != null)
                            {
                                string uRL_SetBrightness = null;
+                               bool validBrightness = false;
 
-                               ClassSystemMatrixPayloadOutputLevels payload = new ClassSystemMatrixPayloadOutputLevels();
-                               if (theDisplayToSendTo.Count == 0) // Global
+                               if (o.brightnessValue >= 0 && o.brightnessValue <= 100)
+                                   validBrightness = true;
+                               else
                                {
-                                   if (o.brightnessValue == -1) // Set to default
-                                       PostIt("[ALL]", client, "https://" + theData.Address + ":" + theData.Port + "/api/global/commands/defaultbrightness");
-                                   else
-                                       PostIt("[ALL]", client, "https://" + theData.Address + ":" + theData.Port + "/api/global/commands/brightness/" + o.brightnessValue.ToString());
-                               }
-                               else // Display ID selected
+                                   Console.WriteLine("Error: Test Pattern brightness value not valid: " + o.brightnessValue.ToString());
+                                }
+
+                               if (validBrightness == true)
                                {
-                                   foreach (displayToSendTo g in theDisplayToSendTo)
+                                   ClassSystemMatrixPayloadOutputLevels payload = new ClassSystemMatrixPayloadOutputLevels();
+                                   if (theDisplayToSendTo.Count == 0) // Global
                                    {
                                        if (o.brightnessValue == -1) // Set to default
-                                           PostIt(g.displayName, client, uRL_SetBrightness = "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + g.displayGuid + "/commands/defaultbrightness");
+                                           PostIt("[ALL]", client, "https://" + theData.Address + ":" + theData.Port + "/api/global/commands/defaultbrightness");
                                        else
-                                           PostIt(g.displayName, client, uRL_SetBrightness = "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + g.displayGuid + "/commands/brightness/" + o.brightnessValue.ToString());
+                                           PostIt("[ALL]", client, "https://" + theData.Address + ":" + theData.Port + "/api/global/commands/brightness/" + o.brightnessValue.ToString());
+                                   }
+                                   else // Display ID selected
+                                   {
+                                       foreach (displayToSendTo g in theDisplayToSendTo)
+                                       {
+                                           if (o.brightnessValue == -1) // Set to default
+                                               PostIt(g.displayName, client, uRL_SetBrightness = "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + g.displayGuid + "/commands/defaultbrightness");
+                                           else
+                                               PostIt(g.displayName, client, uRL_SetBrightness = "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + g.displayGuid + "/commands/brightness/" + o.brightnessValue.ToString());
+                                       }
                                    }
                                }
                            }
@@ -324,40 +335,78 @@ namespace SMcommand
                                thePatternPayload.Action = SystemMatrixCommandPayload_Action.Start;
                                thePatternPayload.Brightness = brightnessValueForTestPattern;
                                bool validTestPattern = true;
+                               bool validBrightness = false;
 
-                               switch (o.testPattern.ToLower ())
+
+                               List<string> options = new List<string>();
+
+                               foreach (object s in o.testPattern)
                                {
-                                   case "solidred": thePatternPayload.TestPattern = SystemMatrixCommandPayload_TestPattern.SolidRed; break;
-                                   case "solidgreen": thePatternPayload.TestPattern = SystemMatrixCommandPayload_TestPattern.SolidGreen; break;
-                                   case "solidblue": thePatternPayload.TestPattern = SystemMatrixCommandPayload_TestPattern.SolidBlue; break;
-                                   case "solidwhite": thePatternPayload.TestPattern = SystemMatrixCommandPayload_TestPattern.SolidWhite; break;
-                                   case "cyclecolors": thePatternPayload.TestPattern = SystemMatrixCommandPayload_TestPattern.CycleColors; break;
-                                   case "linesvertical": thePatternPayload.TestPattern = SystemMatrixCommandPayload_TestPattern.LinesVertical; break;
-                                   case "linesdiagonal": thePatternPayload.TestPattern = SystemMatrixCommandPayload_TestPattern.LinesDiagonal; break;
-                                   case "gridcolors": thePatternPayload.TestPattern = SystemMatrixCommandPayload_TestPattern.GridColors; break;
-                                   case "gridnumbered": thePatternPayload.TestPattern = SystemMatrixCommandPayload_TestPattern.GridNumbered; break;
-
-                                   default:
-                                       {
-                                           validTestPattern = false;
-                                           Console.WriteLine("Error: Test pattern not valid: '" + o.testPattern + "'");
-                                       }; break;
+                                   options.Add((string) s);
+                                   Console.WriteLine("Paramter:" + (string)s);
                                }
 
-                               if (validTestPattern == true)
-                               {
-                                   var postPayload = new StringContent(thePatternPayload.Json(), Encoding.UTF8, "application/json");
 
-                                   if (theDisplayToSendTo.Count == 0) // Global
+                               if (options.Count == 2)
+                               {
+                                   switch (options[0].ToLower())
                                    {
-                                       foreach (var i in theMonitoringData.theData.Displays)
-                                           PostIt(i.Name, client, "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + i.Id + "/commands/testpatterns", postPayload);
+                                       case "solidred": thePatternPayload.TestPattern = SystemMatrixCommandPayload_TestPattern.SolidRed; break;
+                                       case "solidgreen": thePatternPayload.TestPattern = SystemMatrixCommandPayload_TestPattern.SolidGreen; break;
+                                       case "solidblue": thePatternPayload.TestPattern = SystemMatrixCommandPayload_TestPattern.SolidBlue; break;
+                                       case "solidwhite": thePatternPayload.TestPattern = SystemMatrixCommandPayload_TestPattern.SolidWhite; break;
+                                       case "cyclecolors": thePatternPayload.TestPattern = SystemMatrixCommandPayload_TestPattern.CycleColors; break;
+                                       case "linesvertical": thePatternPayload.TestPattern = SystemMatrixCommandPayload_TestPattern.LinesVertical; break;
+                                       case "linesdiagonal": thePatternPayload.TestPattern = SystemMatrixCommandPayload_TestPattern.LinesDiagonal; break;
+                                       case "gridcolors": thePatternPayload.TestPattern = SystemMatrixCommandPayload_TestPattern.GridColors; break;
+                                       case "gridnumbered": thePatternPayload.TestPattern = SystemMatrixCommandPayload_TestPattern.GridNumbered; break;
+
+                                       default:
+                                           {
+                                               validTestPattern = false;
+                                               Console.WriteLine("Error: Test pattern - not valid pattern: '" + o.testPattern + "'");
+                                           }; break;
                                    }
-                                   else
+
+                                   try
                                    {
-                                       foreach (displayToSendTo g in theDisplayToSendTo)
-                                           PostIt(g.displayName, client, "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + g.displayGuid + "/commands/testpatterns", postPayload);
+                                       thePatternPayload.Brightness = Convert.ToDouble(options[1]);
+
+                                       if (thePatternPayload.Brightness >= 0 && thePatternPayload.Brightness <= 100)
+                                       {
+                                           Console.WriteLine("Test pattern brightness: " + thePatternPayload.Brightness);
+                                           validBrightness = true;
+                                       }
+                                       else
+                                       {
+                                           Console.WriteLine("Error: Test Pattern brightness value not valid: " + thePatternPayload.Brightness.ToString());
+                                       }
                                    }
+                                   catch
+                                   {
+                                       Console.WriteLine("Error: Test pattern Brightness not correct.");
+                                   }
+
+
+                                   if (validTestPattern == true && validBrightness == true)
+                                   {
+                                       var postPayload = new StringContent(thePatternPayload.Json(), Encoding.UTF8, "application/json");
+
+                                       if (theDisplayToSendTo.Count == 0) // Global
+                                       {
+                                           foreach (var i in theMonitoringData.theData.Displays)
+                                               PostIt(i.Name, client, "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + i.Id + "/commands/testpatterns", postPayload);
+                                       }
+                                       else
+                                       {
+                                           foreach (displayToSendTo g in theDisplayToSendTo)
+                                               PostIt(g.displayName, client, "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + g.displayGuid + "/commands/testpatterns", postPayload);
+                                       }
+                                   }
+                               }
+                               else
+                               {
+                                   Console.WriteLine("Test Pattern mising required parameters. Required [pattern] [brightness] # Parmeters provided:" + options.Count);
                                }
                            }
                        }
@@ -368,11 +417,18 @@ namespace SMcommand
         {
             public string displayName;
             public Guid displayGuid;
+            public double brightness = 10;
 
             public displayToSendTo (Guid g, string n)
             {
                 displayName = n;
                 displayGuid = g;
+            }
+
+            public displayToSendTo(SM_Display d)
+            {
+                displayName = d.Name;
+                displayGuid = d.Id;
             }
         }
 

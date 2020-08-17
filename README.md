@@ -7,7 +7,7 @@ SMcommand is a command line (Windows) application that demonstrates the use of t
 **--port**                The port System Matrix is running on [int] default is 82  
 **-u, --username**        System Matrix API username  
 **-p, --password**        System Matrix API password  
-**-s, --save**            Save the settings (username, password etc)  
+**-s, --save**            Save the settings (username, password, etc)  
 **-l, --listdisplays**    Prints all messages to standard output.  
 **-j, --savejson**        Saves the Monitoring data to Monitoring.json  
 **-b, --brightness**      The brightness value to set to [int] (-1 to revert to default value)   

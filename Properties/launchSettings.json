@@ -2,7 +2,7 @@
   "profiles": {
     "SystemMatrixAPIDemoConsoleApp": {
       "commandName": "Project",
-      "commandLineArgs": "-b 15"
+      "commandLineArgs": "-starttestpattern SolidRed 12 -u Admin -p Prismview123 -d DisplayP6 DisplayP10"
     }
   }
 }
