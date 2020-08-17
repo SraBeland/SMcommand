@@ -19,6 +19,6 @@ SMcommand is a command line (Windows) application that demonstrates the use of t
 **--powercycle**          Cycle Power power supplies.  
 **--enableoutput**        Enables output on all controllers.  
 **--disableoutput**       Disables output on all controllers.  
-**--starttestpattern**    Starts a test pattern [SolidRed, SolidGreen, SolidBlue, SolidWhite, CycleColors, LinesVertical, LinesDiagonal, GridColors, GridNumbered]  
+**--starttestpattern**    Starts a test pattern [Pattern] [Brightness] Patterns:[SolidRed, SolidGreen, SolidBlue, SolidWhite, CycleColors, LinesVertical, LinesDiagonal, GridColors, GridNumbered]  
 **--stoptestpattern**     Stop test pattern  
 **--help**                Display this help screen.  
