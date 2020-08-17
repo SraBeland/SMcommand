@@ -8,6 +8,8 @@ SMcommand is a command line (Windows) application that demonstrates the use of t
 **-u, --username**        System Matrix API username  
 **-p, --password**        System Matrix API password  
 **-s, --save**            Save the settings (username, password, etc)  
+**--starttestpattern**    Starts a test pattern [Pattern] [Brightness] Patterns:[SolidRed, SolidGreen, SolidBlue, SolidWhite, CycleColors, LinesVertical, LinesDiagonal, GridColors, GridNumbered]  
+**--stoptestpattern**     Stop test pattern  
 **-l, --listdisplays**    Prints all messages to standard output.  
 **-j, --savejson**        Saves the Monitoring data to Monitoring.json  
 **-b, --brightness**      The brightness value to set to [int] (-1 to revert to default value)   
@@ -19,6 +21,4 @@ SMcommand is a command line (Windows) application that demonstrates the use of t
 **--powercycle**          Cycle Power power supplies.  
 **--enableoutput**        Enables output on all controllers.  
 **--disableoutput**       Disables output on all controllers.  
-**--starttestpattern**    Starts a test pattern [Pattern] [Brightness] Patterns:[SolidRed, SolidGreen, SolidBlue, SolidWhite, CycleColors, LinesVertical, LinesDiagonal, GridColors, GridNumbered]  
-**--stoptestpattern**     Stop test pattern  
 **--help**                Display this help screen.  

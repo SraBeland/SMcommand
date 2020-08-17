@@ -44,6 +44,9 @@ namespace SMcommand
             [Option('t', "starttestpattern", Required = false, HelpText = "Starts a test pattern [SolidRed, SolidGreen, SolidBlue, SolidWhite, CycleColors, LinesVertical, LinesDiagonal, GridColors, GridNumbered] [brightness]")]
             public IEnumerable<string> testPattern { get; set; } = null;
 
+            [Option("stoptestpattern", Required = false, HelpText = "Stop test pattern")]
+            public bool testPatternStop { get; set; } = false;
+
             [Option('d', "displays", Required = false, HelpText = "Display ID (GUID or Name) to control (do not include to send to all display)")]
             public IEnumerable<string> DisplayList { get; set; } = null;
 
@@ -67,9 +70,6 @@ namespace SMcommand
 
             [Option("disableoutput", Required = false, HelpText = "Disables output on all controllers.")]
             public bool disableOutput { get; set; } = false;
-
-            [Option("stoptestpattern", Required = false, HelpText = "Stop test pattern")]
-            public bool testPatternStop { get; set; } = false;
         }
 
 
