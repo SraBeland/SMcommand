@@ -1,6 +1,7 @@
 # SMcommand
-Command line utility to control System Matrix Prismview displays.  
-*Written be Graham Beland*
+SMcommand is a command line (Windows) application that demonstrates the use of the System Matrix API and provides a method of controlling some functions of the Prismview displays controlled by System Matrix.  
+
+*Written by Graham Beland*
 
 **-a, --address**         System Matrix IP address [example: localhost, 192.168.1.1]  
 **--port**                The port System Matrix is running on [int] default is 82  
