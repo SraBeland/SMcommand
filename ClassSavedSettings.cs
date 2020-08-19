@@ -18,6 +18,9 @@ namespace SMcommand
         public string Address { get; set; } = "localhost"; 
         public int? Port { get; set; } = 82;
 
+        [JsonIgnore]
+        static private string key = "E546C8DF278CD5931069B522E695D4F2";
+
 
         static public ClassSavedSettings Load(bool doNotLoad = false) 
         {
@@ -33,6 +36,8 @@ namespace SMcommand
                     {
                         JsonSerializer serializer = new JsonSerializer();
                         theData = (ClassSavedSettings)serializer.Deserialize(file, typeof(ClassSavedSettings));
+
+                        theData.Password = Encrypt.DecryptString(theData.Password, key);
                     }
                 }
                 catch
@@ -55,9 +60,13 @@ namespace SMcommand
         {
             using (StreamWriter file = File.CreateText(theFilename))
             {
+                ClassSavedSettings c = (ClassSavedSettings) theData.MemberwiseClone();
+
                 JsonSerializer serializer = new JsonSerializer();
                 serializer.Formatting = Formatting.Indented;
-                serializer.Serialize(file, theData);
+
+                c.Password = Encrypt.EncryptString (theData.Password, key);
+                serializer.Serialize(file, c);
             }
         }
     }
