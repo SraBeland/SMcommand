@@ -22,4 +22,5 @@ SMcommand is a command line (Windows) application that demonstrates the use of t
 **--enableoutput**        Enables output on all controllers.  
 **--disableoutput**       Disables output on all controllers.  
 **--help**                Display this help screen.  
+**-q, --quite**           Reports only if errors are encountered.
 **--version**             Display the version.  
