@@ -73,6 +73,9 @@ namespace SMcommand
 
             [Option('q', "quite", Required = false, HelpText = "Reports only if errors are encountered.")]
             public bool quiteMode { get; set; } = false;
+
+            [Option("version", Required = false, HelpText = "Reports version.")]
+            public bool version { get; set; } = false;
         }
 
 
@@ -88,9 +91,13 @@ namespace SMcommand
             HttpClient client = new HttpClient(clientHandler);
             SM_Monitoring theMonitoringData;
 
+
             Parser.Default.ParseArguments<Options>(args)
                    .WithParsed<Options>(o =>
                    {
+                       if (o.version)
+                        Console.WriteLine("Version: " + System.Reflection.Assembly.GetExecutingAssembly());
+
                        if (o.address != null)
                             theData.Address = o.address;
 
