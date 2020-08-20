@@ -28,9 +28,9 @@ SMcommand is a command line (Windows) application that demonstrates the use of t
   
   
 **Return Values:**  
-0 Success (all actions OK.)  
--1 Command parse error (the parameters pass to the program ar incorrect)  
--2 Failed to connect.  
--3 Command failed (the response from System Matrix indicates a failure).  
--4 Display ID not found.  
--5 Value not valid (brightness value to hig/low?)  
+**0** Success (all actions OK.)  
+**-1** Command parse error (the parameters pass to the program ar incorrect)  
+**-2** Failed to connect.  
+**-3** Command failed (the response from System Matrix indicates a failure).  
+**-4** Display ID not found.  
+**-5** Value not valid (brightness value to high/low?)  

@@ -84,8 +84,7 @@ namespace SMcommand
             HttpClientHandler clientHandler = new HttpClientHandler();
             clientHandler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; };
             int brightnessValueForTestPattern = 10;
-            int returnValue = 0;
-
+            ReturnValue returnValue = new ReturnValue();
             ClassSavedSettings theData = ClassSavedSettings.Load();
 
             // Pass the handler to httpclient(from you are calling api)
@@ -193,7 +192,7 @@ namespace SMcommand
                            {
                                connectFailed = true;
 
-                               returnValue = -2;
+                               returnValue.theValue = -2;
                                Console.WriteLine("Connection Failed!");
                                Console.WriteLine("Exception:");
                                Console.WriteLine(e.Message);
@@ -237,7 +236,7 @@ namespace SMcommand
 
                             if (foundIt == false)
                             {
-                               returnValue = -4;
+                               returnValue.theValue = -4;
                                Console.WriteLine("Error: The selected display [" + d + "] ID is not found.");
                                return;
                             }
@@ -256,7 +255,7 @@ namespace SMcommand
                                    validBrightness = true;
                                else
                                {
-                                   returnValue = -5;
+                                   returnValue.theValue = -5;
 
                                    Console.WriteLine("Error: Test Pattern brightness value not valid: " + o.brightnessValue.ToString());
                                 }
@@ -267,18 +266,18 @@ namespace SMcommand
                                    if (theDisplayToSendTo.Count == 0) // Global
                                    {
                                        if (o.brightnessValue == -1) // Set to default
-                                           returnValue = PostIt("[ALL]", client, "https://" + theData.Address + ":" + theData.Port + "/api/global/commands/defaultbrightness", o.quiteMode);
+                                           returnValue.theValue = PostIt("[ALL]", client, "https://" + theData.Address + ":" + theData.Port + "/api/global/commands/defaultbrightness", o.quiteMode);
                                        else
-                                           returnValue = PostIt("[ALL]", client, "https://" + theData.Address + ":" + theData.Port + "/api/global/commands/brightness/" + o.brightnessValue.ToString(), o.quiteMode);
+                                           returnValue.theValue = PostIt("[ALL]", client, "https://" + theData.Address + ":" + theData.Port + "/api/global/commands/brightness/" + o.brightnessValue.ToString(), o.quiteMode);
                                    }
                                    else // Display ID selected
                                    {
                                        foreach (displayToSendTo g in theDisplayToSendTo)
                                        {
                                            if (o.brightnessValue == -1) // Set to default
-                                               returnValue = PostIt(g.displayName, client, uRL_SetBrightness = "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + g.displayGuid + "/commands/defaultbrightness", o.quiteMode);
+                                               returnValue.theValue = PostIt(g.displayName, client, uRL_SetBrightness = "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + g.displayGuid + "/commands/defaultbrightness", o.quiteMode);
                                            else
-                                               returnValue = PostIt(g.displayName, client, uRL_SetBrightness = "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + g.displayGuid + "/commands/brightness/" + o.brightnessValue.ToString(), o.quiteMode);
+                                               returnValue.theValue = PostIt(g.displayName, client, uRL_SetBrightness = "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + g.displayGuid + "/commands/brightness/" + o.brightnessValue.ToString(), o.quiteMode);
                                        }
                                    }
                                }
@@ -288,66 +287,66 @@ namespace SMcommand
                            if (o.powerOff == true)
                            {
                                if (theDisplayToSendTo.Count == 0) // Global
-                                   returnValue = PostIt("[ALL]", client, "https://" + theData.Address + ":" + theData.Port + "/api/global/commands/powerOff", o.quiteMode);
+                                   returnValue.theValue = PostIt("[ALL]", client, "https://" + theData.Address + ":" + theData.Port + "/api/global/commands/powerOff", o.quiteMode);
                                else
                                {
                                    foreach (displayToSendTo g in theDisplayToSendTo)
-                                       returnValue = PostIt(g.displayName, client, "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + g.displayGuid + "/commands/powerOff", o.quiteMode);
+                                       returnValue.theValue = PostIt(g.displayName, client, "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + g.displayGuid + "/commands/powerOff", o.quiteMode);
                                }
                            }
 
                            if (o.powerOn == true)
                            {
                                if (theDisplayToSendTo.Count == 0) // Global
-                                   returnValue = PostIt("[ALL]", client, "https://" + theData.Address + ":" + theData.Port + "/api/global/commands/powerOn", o.quiteMode);
+                                   returnValue.theValue = PostIt("[ALL]", client, "https://" + theData.Address + ":" + theData.Port + "/api/global/commands/powerOn", o.quiteMode);
                                else
                                {
                                    foreach (displayToSendTo g in theDisplayToSendTo)
-                                       returnValue = PostIt(g.displayName, client, "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + g.displayGuid + "/commands/powerOn", o.quiteMode);
+                                       returnValue.theValue = PostIt(g.displayName, client, "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + g.displayGuid + "/commands/powerOn", o.quiteMode);
                                }
                            }
 
                            if (o.powerCycle == true)
                            {
                                if (theDisplayToSendTo.Count == 0) // Global
-                                   returnValue = PostIt("[ALL]", client, "https://" + theData.Address + ":" + theData.Port + "/api/global/commands/powerCycle", o.quiteMode);
+                                   returnValue.theValue = PostIt("[ALL]", client, "https://" + theData.Address + ":" + theData.Port + "/api/global/commands/powerCycle", o.quiteMode);
                                else
                                {
                                    foreach (displayToSendTo g in theDisplayToSendTo)
-                                       returnValue = PostIt(g.displayName, client, "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + g.displayGuid + "/commands/powerCycle", o.quiteMode);
+                                       returnValue.theValue = PostIt(g.displayName, client, "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + g.displayGuid + "/commands/powerCycle", o.quiteMode);
                                }
                            }
 
                            if (o.enableOutput == true)
                            {
                                if (theDisplayToSendTo.Count == 0) // Global
-                                   returnValue = PostIt("[ALL]", client, "https://" + theData.Address + ":" + theData.Port + "/api/global/commands/enableOutput", o.quiteMode);
+                                   returnValue.theValue = PostIt("[ALL]", client, "https://" + theData.Address + ":" + theData.Port + "/api/global/commands/enableOutput", o.quiteMode);
                                else
                                {
                                    foreach (displayToSendTo g in theDisplayToSendTo)
-                                       returnValue = PostIt(g.displayName, client, "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + g.displayGuid + "/commands/enableOutput", o.quiteMode);
+                                       returnValue.theValue = PostIt(g.displayName, client, "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + g.displayGuid + "/commands/enableOutput", o.quiteMode);
                                }
                            }
 
                            if (o.disableOutput == true)
                            {
                                if (theDisplayToSendTo.Count == 0) // Global
-                                   returnValue = PostIt("[ALL]", client, "https://" + theData.Address + ":" + theData.Port + "/api/global/commands/disableOutput", o.quiteMode);
+                                   returnValue.theValue = PostIt("[ALL]", client, "https://" + theData.Address + ":" + theData.Port + "/api/global/commands/disableOutput", o.quiteMode);
                                else
                                {
                                    foreach (displayToSendTo g in theDisplayToSendTo)
-                                       returnValue = PostIt(g.displayName, client, "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + g.displayGuid + "/commands/disableOutput", o.quiteMode);
+                                       returnValue.theValue = PostIt(g.displayName, client, "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + g.displayGuid + "/commands/disableOutput", o.quiteMode);
                                }
                            }
 
                            if (o.refreshHeader == true)
                            {
                                if (theDisplayToSendTo.Count == 0) // Global
-                                   returnValue = PostIt("[ALL]", client, "https://" + theData.Address + ":" + theData.Port + "/api/global/commands/refreshHeader", o.quiteMode);
+                                   returnValue.theValue = PostIt("[ALL]", client, "https://" + theData.Address + ":" + theData.Port + "/api/global/commands/refreshHeader", o.quiteMode);
                                else
                                {
                                    foreach (displayToSendTo g in theDisplayToSendTo)
-                                       returnValue = PostIt(g.displayName, client, "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + g.displayGuid + "/commands/sendHeader", o.quiteMode);
+                                       returnValue.theValue = PostIt(g.displayName, client, "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + g.displayGuid + "/commands/sendHeader", o.quiteMode);
                                }
                            }
 
@@ -373,12 +372,12 @@ namespace SMcommand
                                if (theDisplayToSendTo.Count == 0) // Global
                                {
                                    foreach (var i in theMonitoringData.theData.Displays)
-                                       returnValue = PostIt(i.Name, client, "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + i.Id + "/commands/testpatterns", o.quiteMode, postPayload);
+                                       returnValue.theValue = PostIt(i.Name, client, "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + i.Id + "/commands/testpatterns", o.quiteMode, postPayload);
                                }
                                else
                                {
                                    foreach (displayToSendTo g in theDisplayToSendTo)
-                                       returnValue = PostIt(g.displayName, client, "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + g.displayGuid + "/commands/testpatterns", o.quiteMode, postPayload);
+                                       returnValue.theValue = PostIt(g.displayName, client, "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + g.displayGuid + "/commands/testpatterns", o.quiteMode, postPayload);
                                }
                            }
 
@@ -409,7 +408,7 @@ namespace SMcommand
                                        default:
                                            {
                                                validTestPattern = false;
-                                               returnValue = -5;
+                                               returnValue.theValue = -5;
                                                Console.WriteLine("Error: Test pattern - not valid pattern: '" + o.testPattern + "'");
                                            }; break;
                                    }
@@ -425,13 +424,13 @@ namespace SMcommand
                                        }
                                        else
                                        {
-                                           returnValue = -5;
+                                           returnValue.theValue = -5;
                                            Console.WriteLine("Error: Test Pattern brightness value not valid: " + thePatternPayload.Brightness.ToString());
                                        }
                                    }
                                    catch
                                    {
-                                       returnValue = -5;
+                                       returnValue.theValue = -5;
                                        Console.WriteLine("Error: Test pattern Brightness not correct.");
                                    }
 
@@ -443,27 +442,46 @@ namespace SMcommand
                                        if (theDisplayToSendTo.Count == 0) // Global
                                        {
                                            foreach (var i in theMonitoringData.theData.Displays)
-                                               returnValue = PostIt(i.Name, client, "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + i.Id + "/commands/testpatterns", o.quiteMode, postPayload);
+                                               returnValue.theValue = PostIt(i.Name, client, "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + i.Id + "/commands/testpatterns", o.quiteMode, postPayload);
                                        }
                                        else
                                        {
                                            foreach (displayToSendTo g in theDisplayToSendTo)
-                                               returnValue = PostIt(g.displayName, client, "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + g.displayGuid + "/commands/testpatterns", o.quiteMode, postPayload);
+                                               returnValue.theValue = PostIt(g.displayName, client, "https://" + theData.Address + ":" + theData.Port + "/api/displays/" + g.displayGuid + "/commands/testpatterns", o.quiteMode, postPayload);
                                        }
                                    }
                                }
                                else
                                {
-                                   returnValue = -1;
+                                   returnValue.theValue = -1;
                                    Console.WriteLine("Test Pattern missing required parameters. Required [pattern] [brightness] # Parameters provided:" + TestpatternOptions.Count);
                                }
                            }
                        }
                    });
 
-            return returnValue;
+            return returnValue.theValue;
         }
 
+        class ReturnValue
+        {
+            int _returnValue = 0;
+
+            public int theValue
+            {
+                get { return _returnValue; }
+
+                set
+                {
+                    if (value == 0)
+                        return;
+
+                    if (_returnValue > value)
+                        _returnValue = value;
+                }
+            }
+        }
+        
         class displayToSendTo
         {
             public string displayName;

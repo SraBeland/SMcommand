@@ -37,7 +37,14 @@ namespace SMcommand
                         JsonSerializer serializer = new JsonSerializer();
                         theData = (ClassSavedSettings)serializer.Deserialize(file, typeof(ClassSavedSettings));
 
-                        theData.Password = Encrypt.DecryptString(theData.Password, key);
+                        if (theData != null)
+                        {
+                            theData.Password = Encrypt.DecryptString(theData.Password, key);
+                        }
+                        else
+                        {
+                            theData = new ClassSavedSettings();
+                        }
                     }
                 }
                 catch

@@ -1,8 +1,7 @@
 {
   "profiles": {
     "SystemMatrixAPIDemoConsoleApp": {
-      "commandName": "Project",
-      "commandLineArgs": "-u Admin -p Prismview123 -s"
+      "commandName": "Project"
     }
   }
 }
