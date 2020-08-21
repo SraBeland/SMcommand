@@ -74,7 +74,7 @@ namespace SMcommand
             [Option('q', "quite", Required = false, HelpText = "Reports only if errors are encountered.")]
             public bool quiteMode { get; set; } = false;
 
-            [Option("version", Required = false, HelpText = "Reports version.")]
+            [Option("version", Required = false, HelpText = "Reports version.")] 
             public bool version { get; set; } = false;
         }
 
@@ -95,6 +95,8 @@ namespace SMcommand
             Parser.Default.ParseArguments<Options>(args)
                    .WithParsed<Options>(o =>
                    {
+                       RepeatedOptionErrorForvever:
+
                        if (o.version)
                         Console.WriteLine("Version: " + System.Reflection.Assembly.GetExecutingAssembly());
 
