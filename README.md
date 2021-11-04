@@ -1,5 +1,5 @@
 # SMcommand
-SMcommand is a command line (Windows) application that demonstrates the use of the System Matrix API and provides a method of controlling some functions of the Prismview displays controlled by System Matrix.  
+SMcommand is a command line (Windows) application that demonstratesÂ the use of the System Matrix API and provides a method of controlling some functions of the Prismview displays controlled by System Matrix.  
 
 *Written by Graham Beland*
 
@@ -25,7 +25,6 @@ SMcommand is a command line (Windows) application that demonstrates the use of t
 **-q, --quite**           Reports only if errors are encountered.  
 **--version**             Display the version.
 
-  
   
 **Return Values:**  
 **0** Success (all actions OK.)  
