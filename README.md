@@ -25,7 +25,7 @@ SMcommand is a command line (Windows) application that demonstrates the use of 
 **-q, --quite**           Reports only if errors are encountered.  
 **--version**             Display the version.
 
-  
+   
 **Return Values:**  
 **0** Success (all actions OK.)  
 **-1** Command parse error (the parameters pass to the program ar incorrect)  
